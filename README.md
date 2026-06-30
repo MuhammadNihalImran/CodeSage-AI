@@ -6,9 +6,10 @@
 
 ## 🚀 Live Demo & Project Links
 
-*   **Frontend Client**: `https://[your-frontend-vercel-url].vercel.app`
+*   **Frontend Client**: [https://code-sage-ai-hpxf.vercel.app/](https://code-sage-ai-hpxf.vercel.app/)
 *   **Backend API Health Check**: [https://code-sage-ai-inky.vercel.app/health](https://code-sage-ai-inky.vercel.app/health)
 *   **Demo Video**: `[Placeholder: Paste YouTube/Loom Link Here]`
+
 
 ---
 

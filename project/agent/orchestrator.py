@@ -23,15 +23,22 @@ load_dotenv()
 # Setup logging targeting logs/agent_activity.log
 PROJECT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 LOG_FILE = os.path.join(PROJECT_DIR, "logs", "agent_activity.log")
+IS_VERCEL = "VERCEL" in os.environ
 
 activity_logger = logging.getLogger("agent_activity")
 if not activity_logger.handlers:
     activity_logger.setLevel(logging.INFO)
-    os.makedirs(os.path.dirname(LOG_FILE), exist_ok=True)
-    fh = logging.FileHandler(LOG_FILE)
     formatter = logging.Formatter('%(asctime)s - %(message)s')
-    fh.setFormatter(formatter)
-    activity_logger.addHandler(fh)
+    if IS_VERCEL:
+        sh = logging.StreamHandler()
+        sh.setFormatter(formatter)
+        activity_logger.addHandler(sh)
+    else:
+        os.makedirs(os.path.dirname(LOG_FILE), exist_ok=True)
+        fh = logging.FileHandler(LOG_FILE)
+        fh.setFormatter(formatter)
+        activity_logger.addHandler(fh)
+
 
 class OrchestratorAgent:
     """Orchestrator Agent that manages concurrent sub-agent analyses and state updates."""

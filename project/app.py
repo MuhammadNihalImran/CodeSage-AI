@@ -9,16 +9,24 @@ from db.supabase_client import create_session
 # Define project-specific directories
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 LOGS_DIR = os.path.join(BASE_DIR, "logs")
-os.makedirs(LOGS_DIR, exist_ok=True)
 log_file_path = os.path.join(LOGS_DIR, "agent_activity.log")
+IS_VERCEL = "VERCEL" in os.environ
 
 # Setup built-in python logging for agent activities
 activity_logger = logging.getLogger("agent_activity")
 activity_logger.setLevel(logging.INFO)
-file_handler = logging.FileHandler(log_file_path)
 formatter = logging.Formatter('%(asctime)s - %(message)s')
-file_handler.setFormatter(formatter)
-activity_logger.addHandler(file_handler)
+
+if IS_VERCEL:
+    sh = logging.StreamHandler()
+    sh.setFormatter(formatter)
+    activity_logger.addHandler(sh)
+else:
+    os.makedirs(LOGS_DIR, exist_ok=True)
+    file_handler = logging.FileHandler(log_file_path)
+    file_handler.setFormatter(formatter)
+    activity_logger.addHandler(file_handler)
+
 
 app = FastAPI(title="AI Code Mentor Agent")
 

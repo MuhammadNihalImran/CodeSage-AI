@@ -10,15 +10,22 @@ load_dotenv()
 # Setup logs directory and logger
 PROJECT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 LOG_FILE = os.path.join(PROJECT_DIR, "logs", "agent_activity.log")
+IS_VERCEL = "VERCEL" in os.environ
 
 activity_logger = logging.getLogger("agent_activity")
 if not activity_logger.handlers:
     activity_logger.setLevel(logging.INFO)
-    os.makedirs(os.path.dirname(LOG_FILE), exist_ok=True)
-    fh = logging.FileHandler(LOG_FILE)
     formatter = logging.Formatter('%(asctime)s - %(message)s')
-    fh.setFormatter(formatter)
-    activity_logger.addHandler(fh)
+    if IS_VERCEL:
+        sh = logging.StreamHandler()
+        sh.setFormatter(formatter)
+        activity_logger.addHandler(sh)
+    else:
+        os.makedirs(os.path.dirname(LOG_FILE), exist_ok=True)
+        fh = logging.FileHandler(LOG_FILE)
+        fh.setFormatter(formatter)
+        activity_logger.addHandler(fh)
+
 
 SUPABASE_URL = os.environ.get("SUPABASE_URL")
 SUPABASE_KEY = os.environ.get("SUPABASE_KEY")

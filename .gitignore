@@ -1,0 +1,33 @@
+# Local environment variables
+.env
+.env.local
+.env.production
+.env.production.local
+project/.env
+frontend/.env
+frontend/.env.production
+
+# Dependency directories
+node_modules/
+project/venv/
+project/.venv/
+project/env/
+project/.env/
+
+# Logs and system cache
+*.log
+project/logs/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.agents/
+.system_generated/
+.gemini/
+
+# Build outputs
+frontend/dist/
+frontend/build/
+dist/
+build/

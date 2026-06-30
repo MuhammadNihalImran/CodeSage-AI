@@ -240,27 +240,65 @@ async def run_evaluation():
             "output": response
         })
 
-    # Print results summary table
-    print("\n" + "=" * 70)
-    print(f"EVALUATION SUMMARY REPORT (Score: {passed_count}/{len(TEST_CASES)})")
-    print("=" * 70)
-    print(f"{'Test Case Name':<35} | {'Category':<12} | {'Status':<6}")
-    print("-" * 70)
-    for res in results:
-        print(f"{res['name']:<35} | {res['category']:<12} | {res['status']:<6}")
-    print("=" * 70)
+    # Calculate category breakdowns
+    sec_passed = sum(1 for r in results if r["category"] == "security" and r["status"] == "PASS")
+    bug_passed = sum(1 for r in results if r["category"] == "bug" and r["status"] == "PASS")
+    opt_passed = sum(1 for r in results if r["category"] == "optimization" and r["status"] == "PASS")
+    
+    total_cases = len(TEST_CASES)
+    failed_count = total_cases - passed_count
+    accuracy = (passed_count / total_cases) * 100
 
-    # Print debugging output for failed tests
+    # Print console report in requested format
+    print("\n===== AI Code Mentor Agent — Evaluation Report =====")
+    print(f"Total Test Cases: {total_cases}")
+    print(f"Passed: {passed_count}")
+    print(f"Failed: {failed_count}")
+    print(f"Accuracy: {accuracy:.0f}%")
+    print("Breakdown by category:\n")
+    print(f"Security: {sec_passed}/4 passed")
+    print(f"Bug Detection: {bug_passed}/4 passed")
+    print(f"Optimization: {opt_passed}/2 passed\n")
+
     failed_tests = [r for r in results if r["status"] == "FAIL"]
     if failed_tests:
-        print("\nFailed Tests Details:")
+        print("Failed cases:")
         for res in failed_tests:
-            print(f"- {res['name']}: Expected keyword '{res['keyword']}' not found in:")
-            print(f"  {res['output']}")
-            print("-" * 50)
+            print(f"[{res['name']}]: expected '{res['keyword']}' not found in response")
     else:
-        print("\nAll agent verification checks passed successfully!")
-    print("=" * 70)
+        print("Failed cases (if any): None")
+    print("=====================================================")
+
+    # Generate Markdown Table Report
+    md_content = f"""# Agent Evaluation Results
+
+**Mock Mode**: `{USE_MOCK_FOR_EVAL}`
+**Overall Accuracy**: `{accuracy:.0f}%` (`{passed_count}/{total_cases}` passed)
+
+## Results Breakdown
+
+| Category | Score | Percentage |
+| :--- | :---: | :---: |
+| Security | `{sec_passed}/4` | `{(sec_passed/4)*100:.0f}%` |
+| Bug Detection | `{bug_passed}/4` | `{(bug_passed/4)*100:.0f}%` |
+| Optimization | `{opt_passed}/2` | `{(opt_passed/2)*100:.0f}%` |
+
+## Test Case Details
+
+| Test Case Name | Category | Expected Keyword | Status |
+| :--- | :--- | :--- | :---: |
+"""
+    for res in results:
+        md_content += f"| `{res['name']}` | {res['category'].capitalize()} | `{res['keyword']}` | {'✅ PASS' if res['status'] == 'PASS' else '❌ FAIL'} |\n"
+
+    # Save to project/tests/evaluation_results.md
+    md_file_path = os.path.join(PROJECT_DIR, "tests", "evaluation_results.md")
+    try:
+        with open(md_file_path, "w", encoding="utf-8") as f:
+            f.write(md_content)
+        print(f"\nSaved markdown report to: {md_file_path}")
+    except Exception as e:
+        print(f"Failed to save markdown report: {e}")
 
 if __name__ == "__main__":
     asyncio.run(run_evaluation())
